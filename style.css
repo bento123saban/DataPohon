@@ -14,16 +14,17 @@ body {
 
 
 .form-group {
-   border-top: 2px solid rgb(18, 179, 232) !important;
+   border-top: 2px solid rgb(1, 157, 45) !important;
    margin-bottom: 15px;
+   border: 1px solid lightgrey;
 }
 .form-group input, textarea {
     border: none !important;
-    border-bottom: 1.3px solid dodgerblue !important;
+    border-bottom: 1.3px solid rgb(0, 167, 11) !important;
     border-radius: 0 !important;
     background-color:  transparent;
     outline: none !important;
-    color: #013957 !important;
+    color: #003204 !important;
     font-size: 17px;
     font-weight: bold;
 }
@@ -43,7 +44,7 @@ body {
 }
 
 .radio-inline:has(input[type="radio"]:checked) {
-    color: rgb(6, 56, 106);
+    color: rgb(3, 209, 58);
     font-weight: bold;
 }
 /* Mengatur ulang penampilan bawaan */
@@ -67,9 +68,9 @@ input[type="radio"] {
     }
 /* Mengatur tampilan titik saat terpilih */
 input[type="radio"]:checked {
-    background-color: deepskyblue;
+    background-color: rgb(1, 216, 66);
     scale: 1.2;
-    outline-color: dodgerblue !important; /* Warna isi saat terpilih */
+    outline-color: rgb(0, 115, 29) !important; /* Warna isi saat terpilih */
 }
 
 input::placeholder, textarea::placeholder {
