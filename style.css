@@ -1,0 +1,85 @@
+
+
+body {
+    background-color: #ddd !important;
+}
+.clr-somegrey {
+    color: #666 !important;
+}
+
+
+
+
+
+
+
+.form-group {
+   border-top: 2px solid rgb(18, 179, 232) !important;
+   margin-bottom: 15px;
+}
+.form-group input, textarea {
+    border: none !important;
+    border-bottom: 1.3px solid dodgerblue !important;
+    border-radius: 0 !important;
+    background-color:  transparent;
+    outline: none !important;
+    color: #013957 !important;
+    font-size: 17px;
+    font-weight: bold;
+}
+.ask-label {
+    color: #444;
+    border-bottom:  dotted 1.3px grey;
+    padding-bottom: 3px;
+    font-size: 14px;
+    margin-bottom: 6px !important;
+}
+.radio-inline {
+    display: flex;
+    align-items: flex-start;
+    width: calc(50% - 5px);
+    font-size: 13px;
+    gap: 10px;
+}
+
+.radio-inline:has(input[type="radio"]:checked) {
+    color: rgb(6, 56, 106);
+    font-weight: bold;
+}
+/* Mengatur ulang penampilan bawaan */
+input[type="radio"] {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    -webkit-appearance: none; /* Untuk Chrome/Safari */
+    -moz-appearance: none;    /* Untuk Firefox */
+    appearance: none;
+
+    /* Sekarang Anda bisa menentukan ukuran fisik */
+    width: 8px; 
+    height: 8px;
+    
+    /* Membuat tampilan lingkaran */
+    outline: 2px solid #666 !important;
+    outline-offset: 2px !important;
+    border-radius: 50%;     /* Bentuk lingkaran */
+    border: none !important;
+        background-color: #fff; /* Warna isi saat tidak terpilih */
+        cursor: pointer;        /* Mengubah kursor saat hover */
+    }
+/* Mengatur tampilan titik saat terpilih */
+input[type="radio"]:checked {
+    background-color: deepskyblue;
+    scale: 1.2;
+    outline-color: dodgerblue !important; /* Warna isi saat terpilih */
+}
+
+input::placeholder, textarea::placeholder {
+    color: rgb(128, 128, 128) !important;
+    font-weight: normal !important;
+}
+
+
+
+
+
+
+

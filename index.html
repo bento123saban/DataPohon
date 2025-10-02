@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="bendhard16.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="./font/fontawsome/css/all.css">
+
+</head>
+<body>
+
+    <div class=" vw-100 vh-100 clr-somegrey content" id="main">
+        <div id="form" class="p-20">
+            <h2 class="align-center blue p-20 borad-5">Form Data Pohon</h2>
+
+            <div class="form-group white p-10 borad-5">
+                <label class=" dis-block ask-label bolder w-100">Koordinat :</label>
+                <div class="flex-beetwen w-100 gap-10">
+                    <input type="text" id="LatLong" readonly class="w-100 p-5 borad-3" placeholder="Auto Detected">
+                </div>
+            </div>
+            
+            <div class="form-group white p-10 borad-5">
+                <label class=" dis-block ask-label bolder">Lokasi Jalan :</label>
+                <div class="radio-list flex-start gap-10 flex-wrap  clr-somegrey">
+                    <label class="radio-inline">
+                        <input type="radio" name="lokasi_jalan" value="Jl. Yan Paays"> Jl. Yan Paays
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" name="lokasi_jalan" value="Jl. Pattimura"> Jl. Pattimura
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" name="lokasi_jalan" value="Jl. Sultan Hairun"> Jl. Sultan Hairun
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" name="lokasi_jalan" value="Jl. Imam Bonjol"> Jl. Imam Bonjol
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" name="lokasi_jalan" value="Jl. Diponegoro"> Jl. Diponegoro  
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group white p-10 borad-5">
+                <label class=" dis-block ask-label bolder w-100">Nama Pohon</label>
+                <div class="flex-beetwen w-100 gap-10">
+                    <input type="text" id="nama" class="w-100 p-5 borad-3" placeholder="Jawaban Anda">
+                </div>
+            </div>
+
+            <div class="form-group white p-10 borad-5">
+                <label class=" dis-block ask-label bolder w-100">Usia Pohon</label>
+                <span class="fz-10 m-0 p-0">Masukan usia dalam tahun</span>
+                <div class="flex-beetwen w-100 gap-10">
+                    <input type="number" maxlength="2" id="usia" class="w-100 p-5 borad-3" placeholder="Jawaban Anda">
+                </div>
+            </div>
+
+            <div class="form-group white p-10 borad-5">
+                <label class=" dis-block ask-label bolder w-100">Diameter Pohon</label>
+                <span class="fz-10 m-0 p-0">Pengukuran di ketinggian 1,3 Meter dari atas permukaan tanah, dalam ukuran centimeter</span>
+                <div class="flex-beetwen mt-1 w-100 gap-10">
+                    <input type="number" maxlength="3" id="diameter" class="w-100 p-5 borad-3" placeholder="Jawaban Anda">
+                </div>
+            </div>
+
+            <div class="form-group white p-10 borad-5">
+                <label class=" dis-block ask-label bolder w-100">Lebar Tajuk</label>
+                <span class="fz-10 m-0 p-0">Lebar tajuk diukur pada bentang terlebar proyeksi tajuk pohon. Dalam ukuran meter</span>
+                <div class="flex-beetwen mt-1 w-100 gap-10">
+                    <input type="number" maxlength="2" id="tajuk" class="w-100 p-5 borad-3" placeholder="Jawaban Anda">
+                </div>
+            </div>
+
+            <div class="form-group white p-10 borad-5">
+                <label class=" dis-block ask-label bolder w-100">Keterangan (opsional)</label>
+                <div class="flex-beetwen mt-1 w-100 gap-10">
+                    <textarea id="keterangan" class="w-100 p-5 borad-3" placeholder="Jawaban Anda" rows="4"></textarea>
+                </div>
+            </div>
+
+            <button class="blue p-10 w-100 fz-17 borad-5 bolder">KIRIM</button>
+
+            
+        </div>
+    </div>
+
+    <div class="content white" id="loader">
+        <div class="loaderx grid-center">
+            <div class="loader-content relative clr-black br-black">
+                <div class="loader" id="the-loader"></div>
+                <div class="align-center loader-text fz-12 clr-blue" id="loader-text">bendhard16</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content grid-center p-20 dis-none vh-100 vw-100" id="verify">
+        <div id="verify-data" class="align-center">
+            <i class="fas fa-check fz-30 grid-center m-auto" ></i>
+            <h4 class="p-5 m-0 uppercase align-center w-100">Granted</h4>
+            <span class="dis-block align-center mt-1 bolder fz-12" id="verify-text">...</span>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
