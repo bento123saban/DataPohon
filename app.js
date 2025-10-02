@@ -547,8 +547,8 @@ class STATIC {
                     document.querySelector("#verify-data").className    = "align-center clr-red"
                 }
                 else {
-                    document.querySelector("#verify i").className       = "fas fa-check fz-30 grid-center m-auto clr-blue"
-                    document.querySelector("#verify-data").className    = "align-center clr-blue"
+                    document.querySelector("#verify i").className       = "fas fa-check fz-30 grid-center m-auto clr-green"
+                    document.querySelector("#verify-data").className    = "align-center clr-green"
                 }
                 if(typeof callback === "function") callback()
             },
