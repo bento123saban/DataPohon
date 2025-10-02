@@ -181,8 +181,6 @@ class TreeFormData {
             const post = await new RequestManager().post({
                 data : data
             })
-
-            post.confirm = false
             
             if (!post.confirm) throw new Error(post.error.message)
             else if (!post.data.confirm) {
