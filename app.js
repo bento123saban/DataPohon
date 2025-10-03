@@ -75,22 +75,12 @@ class TreeFormData {
 
         } else {
             latLongInput.placeholder = "Geolocation tidak didukung.";
-            this.updateLocationIcon('fail');
+            //this.updateLocationIcon('fail');
         }
     }
 
     stopLocationDetection() {
 
-    }
-
-    updateLocationIcon(status) {
-        if (this.elements.locationIcon) {
-            if (status === 'success') {
-                this.elements.locationIcon.innerHTML = '&nbsp;&nbsp;<i class="fas fa-check-circle clr-green"></i>&nbsp;&nbsp;';
-            } else if (status === 'fail') {
-                this.elements.locationIcon.innerHTML = '&nbsp;&nbsp;<i class="fas fa-exclamation-triangle clr-red"></i>&nbsp;&nbsp;';
-            }
-        }
     }
 
     showSuccess(position) {
@@ -118,7 +108,6 @@ class TreeFormData {
         if (!this.elements.latLong.value) {
             this.elements.latLong.placeholder = pesan;
         }
-        this.updateLocationIcon('fail');
     }
 
     // --- DATA COLLECTION & VALIDATION LOGIC ---
@@ -239,6 +228,43 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector("#loader").classList.add("dis-none")
     }, 2000);
 });
+
+
+
+class tree {
+    constructor () {
+        this.elements = {
+            Nama        : document.getElementById('nama'),
+            Usia        : document.getElementById('usia'),
+            Diameter    : document.getElementById('diameter'),
+            Tajuk       : document.getElementById('tajuk'), 
+            Koordinat   : document.getElementById('LatLong'),
+            Keterangan  : document.getElementById('keterangan'),
+            Submit      : document.querySelector('button')
+        };
+    }
+    autoDetectLocation() {
+        const latLongInput = this.elements.Koordinat;
+        
+        if (navigator.geolocation) {
+            latLongInput.placeholder = "Mencoba mendeteksi lokasi...";
+            
+            const options = { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 };
+            const success = (position) => this.showSuccess(position);
+            const error = (err) => this.showError(err);
+            
+            navigator.geolocation.getCurrentPosition(success, error, options);
+            setInterval(() => {
+                navigator.geolocation.getCurrentPosition(success, error, options);
+            }, 2000); 
+
+        } else {
+            latLongInput.placeholder = "Geolocation tidak didukung.";
+            //this.updateLocationIcon('fail');
+        }
+    }
+
+}
 
 
 
