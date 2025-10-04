@@ -3,18 +3,27 @@
 // -------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
     // Inisialisasi class, menargetkan div utama form (id="form")
-    console.log(document.querySelector("#nama"))
     const trx = new tree(); 
-    console.log(trx.elements)
     setTimeout(() => {
         document.querySelector("#loader").classList.add("dis-none")
     }, 2000);
+    return
+    setInterval(() => {
+        return 
+        const options = {method: 'GET', headers: {accept: 'application/json'}};
+        fetch('https://api-bdc.net/data/reverse-geocode?latitude=-5.1544064&longitude=119.455744&localityLanguage=en&key=bdc_32bd6a11c79b423aafda9e61debca87e', options)
+        .then(res => res.json())
+        .then(res => console.log(res))
+        .catch(err => console.error(err));
+        
+    }, 1000)
 });
-
+ 
 
 
 class tree {
     constructor () {
+        this.request = new RequestManager()
         this.elements = {
             Nama        : document.getElementById('nama'),
             Usia        : document.getElementById('usia'),
@@ -58,11 +67,9 @@ class tree {
                 el.checked = true;
                 el.classList.remove("opacity-50");
                 selectionFound = true; // Set flag
-                console.log("Pilihan ditemukan dan dipilih:", el.value);
             } else {
                 el.disabled = true;
                 el.classList.add("opacity-50");
-                console.log("Pilihan tidak cocok atau tidak ada:", el.value);
             }
             
             // 2. TENTUKAN EVENT LISTENER ONCHANGE
@@ -86,7 +93,6 @@ class tree {
     }
     autoDetectLocation() {
         const latLongInput = this.elements.Koordinat;
-        
         if (navigator.geolocation) {
             latLongInput.placeholder = "Mencoba mendeteksi lokasi...";
             
@@ -97,7 +103,7 @@ class tree {
             navigator.geolocation.getCurrentPosition(success, error, options);
             setInterval(() => {
                 navigator.geolocation.getCurrentPosition(success, error, options);
-            }, 1000); 
+            }, 2000); 
 
         } else {
             latLongInput.placeholder = "Geolocation tidak didukung.";
@@ -108,6 +114,18 @@ class tree {
         const lon = position.coords.longitude; 
         this.elements.Koordinat.value = `${lat} ${lon}`;
         this.elements.Koordinat.placeholder = "Lokasi terdeteksi";
+        this.KoordinatData(lat, lon)
+    }
+    async KoordinatData(lat, lon) {
+        const options   = {method: 'GET', headers: {accept: 'application/json'}};
+        const response  = await fetch(`https://us1.locationiq.com/v1/reverse?lat=${lat}&lon=${lon}&key=pk.a9bd630f0a7845193817de89ad1c07ab`, options)
+        const json      = this.xmlToJson(await response.text())
+        const JSX = JSON.parse(json);
+        if (JSX) {
+            const geoData = JSX.reversegeocode.result["#text"]
+            document.getElementById("koordinat-text").innerHTML = geoData
+            //console.log(geoData)
+        }
     }
     showError(error) {
         let pesan;
@@ -157,7 +175,7 @@ class tree {
         STATIC.loaderRun("Mengirim Data...")
 
         try {
-            const post = await new RequestManager().post({
+            const post = await this.request.post({
                 data : data
             })
             
@@ -193,7 +211,6 @@ class tree {
         const data = this.collectData();
         const isValid = this.validate(data);
         if (isValid) {
-            console.log("Data valid, siap dikirim:", data);
             this.clearRecoveryInterval()
             this.sendDataAsQuery(data);
         } else {
@@ -220,6 +237,86 @@ class tree {
     clearRecoveryInterval() {
         clearInterval(this.recoveryInterval)
         localStorage.removeItem("recovery")
+    }
+    xmlToJson(xmlString) {
+        // Fungsi rekursif internal untuk parsing satu elemen menjadi objek JS
+        const parseElement = (element) => {
+            const obj = {};
+
+            // 1. Tangani Atribut (@attributes)
+            if (element.attributes.length > 0) {
+                obj['@attributes'] = {};
+                for (let i = 0; i < element.attributes.length; i++) {
+                    const attr = element.attributes[i];
+                    obj['@attributes'][attr.nodeName] = attr.nodeValue;
+                }
+            }
+
+            const children = element.children;
+            const textContent = element.textContent.trim(); 
+
+            // 2. Tangani Elemen Anak (Child Elements)
+            if (children.length > 0) {
+                for (let i = 0; i < children.length; i++) {
+                    const child = children[i];
+                    const tagName = child.tagName;
+                    const childObj = parseElement(child);
+                    
+                    if (obj[tagName]) {
+                        // Jika sudah ada (array), dorong ke array
+                        if (!Array.isArray(obj[tagName])) {
+                            obj[tagName] = [obj[tagName]];
+                        }
+                        obj[tagName].push(childObj);
+                    } else {
+                        // Jika belum ada, tambahkan
+                        obj[tagName] = childObj;
+                    }
+                }
+            }
+
+            // 3. Tangani Teks Konten (#text)
+            if (children.length === 0 && textContent) {
+                // Jika ada teks tapi tidak ada elemen anak:
+                if (Object.keys(obj).length === 0) {
+                    return textContent; // Jika tidak ada atribut, kembalikan langsung teks
+                }
+                obj['#text'] = textContent; // Jika ada atribut, tambahkan teks di bawah kunci #text
+            }
+
+            // Khusus untuk elemen yang hanya memiliki teks
+            if (Object.keys(obj).length === 0 && textContent) {
+                return textContent;
+            }
+
+            return obj;
+        };
+
+        // --- LOGIKA UTAMA FUNGSINYA ---
+        try {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlString, "text/xml");
+            
+            // Cek jika ada error parsing
+            if (xmlDoc.getElementsByTagName("parsererror").length > 0) {
+                return JSON.stringify({ error: "Gagal parsing XML. Pastikan XML valid." }, null, 4);
+            }
+
+            const rootElement = xmlDoc.documentElement;
+            
+            // Panggil fungsi rekursif internal
+            const parsedObject = parseElement(rootElement);
+
+            // Bungkus hasilnya dengan nama root element
+            const finalJson = {};
+            finalJson[rootElement.tagName] = parsedObject; 
+
+            // Konversi objek JavaScript ke string JSON yang terformat
+            return JSON.stringify(finalJson, null, 4);
+
+        } catch (e) {
+            return JSON.stringify({ error: `Error saat konversi XML: ${e.message}` }, null, 4);
+        }
     }
 }
 
@@ -275,7 +372,6 @@ class RequestManager {
         var base = this._requireBaseURL();                 // <- perbaikan utama
         var url  = this._joinURL(base, path);
         var isOnLine = true //await this.isOnline()
-        //console.log(isOnLine, "BEN")
         if (!isOnLine) {
             var offlineRes = this._makeResult(false, "OFFLINE", null, {
                 code: "OFFLINE",
@@ -387,7 +483,6 @@ class RequestManager {
     }
     _requireBaseURL() {
         var u = this.URL;
-        console.log("Base URL:", u);
         if (!u) throw new Error("RequestManager.baseURL belum diset (AppController/baseURL kosong).");
         return u;
     }
