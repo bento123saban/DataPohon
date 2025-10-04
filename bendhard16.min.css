@@ -53,6 +53,11 @@ input::-webkit-inner-spin-button {
     top: 0;
     left: 0;
 }
+.fixed-top-right {
+    position: fixed;
+    top: 0;
+    right: 0;
+}
 .sticky-top {
     position: sticky;
     top: 0;
@@ -499,6 +504,13 @@ input::-webkit-inner-spin-button {
     backdrop-filter: blur(3px);
     z-index: 1000;
     transition: all .4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+}
+#loader::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(rgba(255,255,255,1), rgba(255,255,255,.1));
 }
 .loaderx {
     height: 100%;
@@ -513,13 +525,19 @@ input::-webkit-inner-spin-button {
     border-right-color: rgb(0, 120, 8);
     animation: l15 1s infinite linear;
 }
+.loader-content.off .loader {
+    border-right-color: red;
+}
 .loader-text {
     position: absolute;
     top: calc(100% + 15px);
     left: 50%;
     transform: translateX(-50%);
     width: 200px;
-    color: white;
+    color: limegreen;
+}
+.loader-content.off .loader-text {
+    color: red;
 }
 .loader::before,
 .loader::after {    

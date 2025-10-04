@@ -11,13 +11,22 @@
 <body>
 
     <div class=" vw-100 vh-100 clr-somegrey content" id="main">
+
         <div id="form" class="p-20">
             <h2 class="align-center green p-20 borad-5">Form Data Pohon</h2>
 
-            <div class="form-group white p-10 borad-5">
-                <label class=" dis-block ask-label bolder w-100">Koordinat :</label>
+            <div class="form-group white p-10 borad-5 relative hidden">
+                <div class="loader-content absolute-top w-100 h-100 grid-center dis-none" id="loader-koordinat">
+                    <div class="loader" id="the-loader"></div>
+                </div>
+                <div class="flex-beetwen align-items-center ask-label">
+                    <label class=" dis-block bolder w-100">Koordinat :</label>
+                    <div class="green p-5 borad-3 grid-center pointer" id="getCoord" title="Deteksi Lokasi">
+                        <i class="fas fa-location fz-16"></i>
+                    </div>
+                </div>
                 <div class="flex-beetwen w-100 gap-10">
-                    <input type="text" id="koordinat" readonly class="w-100 p-5 borad-3" placeholder="Auto Detected">
+                    <input type="text" id="koordinat" readonly class="w-100 p-5 borad-3" placeholder="Tekan tombol di samping kanan atas untuk mendeteksi lokasi">
                 </div>
                 <p class="m-0 p-0 fz-10 mt-1" id="koordinat-text"></p>
             </div>
@@ -84,17 +93,19 @@
                 </div>
             </div>
 
+            <input type="file" accept="image/*" capture="camera" id="camera">
+
             <button class="green p-10 w-100 fz-17 borad-5 bolder">KIRIM</button>
 
             
         </div>
     </div>
 
-    <div class="content white" id="loader">
+    <div class="content" id="loader">
         <div class="loaderx grid-center">
-            <div class="loader-content relative clr-black br-black">
+            <div class="loader-content relative clr-black br-black" id="loader-content">
                 <div class="loader" id="the-loader"></div>
-                <div class="align-center loader-text fz-12 clr-green" id="loader-text"></div>
+                <div class="align-center loader-text fz-12 bolder" id="loader-text"></div>
             </div>
         </div>
     </div>
@@ -106,6 +117,9 @@
             <span class="dis-block align-center mt-1 bolder fz-12" id="verify-text">...</span>
         </div>
     </div>
+
+    
+    <span id="ping" class="fixed-top-right p-5 fz-10 green vw-100 align-right">--</span>
 
     <script src="app.js"></script>
 </body>

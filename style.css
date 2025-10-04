@@ -78,6 +78,11 @@ input::placeholder, textarea::placeholder {
     font-weight: normal !important;
 }
 
+#loader-koordinat {
+    backdrop-filter: blur(2px);
+    top: 0;
+    left: 0;
+}
 
 
 

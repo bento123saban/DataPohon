@@ -4,19 +4,11 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Inisialisasi class, menargetkan div utama form (id="form")
     const trx = new tree(); 
-    setTimeout(() => {
-        document.querySelector("#loader").classList.add("dis-none")
-    }, 2000);
-    return
-    setInterval(() => {
-        return 
-        const options = {method: 'GET', headers: {accept: 'application/json'}};
-        fetch('https://api-bdc.net/data/reverse-geocode?latitude=-5.1544064&longitude=119.455744&localityLanguage=en&key=bdc_32bd6a11c79b423aafda9e61debca87e', options)
-        .then(res => res.json())
-        .then(res => console.log(res))
-        .catch(err => console.error(err));
-        
-    }, 1000)
+    if (navigator.onLine) setTimeout(() => {
+            document.querySelector("#loader").classList.add("dis-none")
+            trx.pingStart()
+        }, 2000);
+    else STATIC.loaderRun("OFFLINE")
 });
  
 
@@ -32,13 +24,22 @@ class tree {
             Koordinat   : document.getElementById('koordinat'),
             Keterangan  : document.getElementById('keterangan')
         };
+        this.coordLoader = document.getElementById('loader-koordinat')
+        this.getCoord = document.getElementById('getCoord')
+        this.coordProscess = false
+        this.loaderContent = document.querySelector("#loader-content")
+        this.pingInterval = null
+        this.pingParam = true
+        this.pingLimit = 10000
+        this.pingElement = document.getElementById("ping")
         this.recoveryInterval = null
         this.Submit = document.querySelector('button')
         this.reRoad = document.querySelector('i.fa-retweet');
         this.radios = document.querySelectorAll("input[name='lokasi_jalan']")
-        this.autoDetectLocation()
+        //this.autoDetectLocation()
         this.eventListener()
         this.autoRecovery()
+        //this.pingStart()
     }
     eventListener(){
         if (this.Submit) {
@@ -54,6 +55,36 @@ class tree {
                 el.classList.remove("opacity-50")
             })
         }  
+        this.getCoord.onclick = () => {
+            console.log("clicked")
+            if (this.coordProscess) return
+            this.coordLoader.classList.remove("dis-none")
+            this.elements.Koordinat.placeholder = "Mendeteksi lokasi..."
+            this.coordProscess = true
+            this.autoDetectLocation()
+            setTimeout(() => {
+                this.coordLoader.classList.add("dis-none")
+                this.coordProscess = false
+            }, 2000)
+        }
+
+        window.addEventListener('online', (event) => {
+            console.log("🎉 Koneksi pulih! Browser sekarang ONLINE.");
+            // Di sini Anda bisa melanjutkan ping atau sinkronisasi data
+            this.loaderContent.classList.remove("off")
+            STATIC.loaderRun("CONNECTING")
+            setTimeout(() => {
+                STATIC.loaderStop()
+                this.pingStart()
+            }, 2500);
+        });
+        window.addEventListener('offline', (event) => {
+            console.log("🚨 Koneksi terputus! Browser sekarang OFFLINE.");
+            // Di sini Anda harus menunda semua operasi ping eksternal
+            STATIC.loaderRun("OFFLINE")
+            this.loaderContent.classList.add("off")
+            this.pingStop()
+        });
     }
     setLokasiJalan() {
         const jalan = JSON.parse(localStorage.getItem("lokasi_jalan"));
@@ -94,17 +125,11 @@ class tree {
     autoDetectLocation() {
         const latLongInput = this.elements.Koordinat;
         if (navigator.geolocation) {
-            latLongInput.placeholder = "Mencoba mendeteksi lokasi...";
-            
+            latLongInput.placeholder = "";
             const options = { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 };
             const success = (position) => this.showSuccess(position);
             const error = (err) => this.showError(err);
-            
             navigator.geolocation.getCurrentPosition(success, error, options);
-            setInterval(() => {
-                navigator.geolocation.getCurrentPosition(success, error, options);
-            }, 5000); 
-
         } else {
             latLongInput.placeholder = "Geolocation tidak didukung.";
         }
@@ -317,6 +342,39 @@ class tree {
         } catch (e) {
             return JSON.stringify({ error: `Error saat konversi XML: ${e.message}` }, null, 4);
         }
+    }
+    pingStart() {
+        this.pingParam = true
+        this.ping()
+    }
+    async ping() {
+        let lastPing = 0
+        while (this.pingParam) {
+            const start = performance.now();
+            this.pingInterval   = setInterval(() => {
+                const on = performance.now();
+                const diff = on - start
+                if (diff >= this.pingLimit || lastPing >= this.pingLimit) {
+                    this.pingElement.classList.add("red")
+                    this.pingElement.classList.remove("green")
+                } else {
+                    this.pingElement.classList.remove("red")
+                    this.pingElement.classList.add("green")
+                }
+                //this.pingElement.textContent = `${Math.round(diff)} ms`
+            }, 500)
+            await this.request.post({
+                xxx : "ping"
+            })
+            lastPing = Math.round(performance.now() - start)
+            this.pingElement.textContent = `${lastPing} ms`
+            clearInterval(this.pingInterval)
+        }
+    }
+    pingStop() {
+        this.pingParam = false
+        clearInterval(this.pingInterval)
+        document.getElementById("ping").textContent = `-`
     }
 }
 
