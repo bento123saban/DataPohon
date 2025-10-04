@@ -1,228 +1,11 @@
-class TreeFormData {
-    /**
-     * @param {string} formSelector - Selector CSS untuk elemen induk formulir (misalnya, '#form').
-     */
-    constructor(formSelector) {
-        this.form = document.querySelector(formSelector);
-        this.locationIntervalId = null; 
-        
-        // --- GANTI URL INI DENGAN URL GOOGLE APPS SCRIPT (GAS) ATAU API TUJUAN ANDA ---
-        this.TARGET_GAS_URL = "https://pohon.dlhpambon2025.workers.dev/"
-        if (!this.form) {
-            console.error("Initialization Error: Form element not found with selector:", formSelector);
-            return;
-        }
-
-        // --- REFERENSI ELEMEN ---
-        this.elements = {
-            nama: document.getElementById('nama'),
-            usia: document.getElementById('usia'),
-            diameter: document.getElementById('diameter'),
-            lebarTajuk: document.getElementById('tajuk'), 
-            latLong: document.getElementById('LatLong'),
-            keterangan: document.getElementById('keterangan'),
-            radioGroup: 'lokasi_jalan', 
-            radioContainer: document.querySelector('.radio-list'),
-            submitButton: this.form.querySelector('button.bolder'),
-            locationIcon: document.querySelector('.flex-beetwen .blue.flex-center') 
-        };
-
-        // --- DAFTAR KOLOM WAJIB ---
-        this.requiredFields = [
-            { key: 'Nama', label: 'Nama Pohon', element: this.elements.nama, isInput: true },
-            { key: 'Usia', label: 'Usia Pohon', element: this.elements.usia, isInput: true },
-            { key: 'Diameter', label: 'Diameter Pohon', element: this.elements.diameter, isInput: true },
-            { key: 'Tajuk', label: 'Lebar Tajuk', element: this.elements.lebarTajuk, isInput: true },
-            { key: 'Lokasi', label: 'Lokasi Jalan', element: this.elements.radioContainer, isInput: false },
-            { key: 'Koordinat', label: 'Position (LatLong)', element: this.elements.latLong, isInput: true }
-        ];
-
-        this.init();
-    }
-
-    // --- INISIALISASI & EVENT HANDLERS ---
-    
-    init() {
-        this.attachEventListeners();
-        this.autoDetectLocation(); // Mulai deteksi lokasi otomatis
-    }
-
-    attachEventListeners() {
-        if (this.elements.submitButton) {
-            this.elements.submitButton.addEventListener('click', (e) => {
-                e.preventDefault(); 
-                this.handleSubmit();
-            });
-        }
-    }
-    
-    // --- LOGIKA GEOLOCATION (Sama seperti sebelumnya) ---
-
-    autoDetectLocation() {
-        const latLongInput = this.elements.latLong;
-        
-        if (navigator.geolocation) {
-            latLongInput.placeholder = "Mencoba mendeteksi lokasi...";
-            
-            const options = { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 };
-            const success = (position) => this.showSuccess(position);
-            const error = (err) => this.showError(err);
-            
-            navigator.geolocation.getCurrentPosition(success, error, options);
-            setInterval(() => {
-                navigator.geolocation.getCurrentPosition(success, error, options);
-            }, 2000); 
-
-        } else {
-            latLongInput.placeholder = "Geolocation tidak didukung.";
-            //this.updateLocationIcon('fail');
-        }
-    }
-
-    stopLocationDetection() {
-
-    }
-
-    showSuccess(position) {
-        this.stopLocationDetection();
-        const lat = position.coords.latitude; 
-        const lon = position.coords.longitude; 
-        this.elements.latLong.value = `${lat} ${lon}`;
-        this.elements.latLong.placeholder = "Lokasi terdeteksi";
-    }
-
-    showError(error) {
-        let pesan;
-        switch(error.code) {
-            case error.PERMISSION_DENIED:
-                pesan = "Akses lokasi ditolak.";
-                this.stopLocationDetection();
-                break;
-            case error.TIMEOUT:
-                pesan = "Deteksi lokasi gagal (Timeout). Mencoba lagi...";
-                break;
-            default:
-                pesan = "Gagal mendeteksi lokasi. Mencoba lagi...";
-        }
-        if (!this.elements.latLong.value) {
-            this.elements.latLong.placeholder = pesan;
-        }
-    }
-
-    // --- DATA COLLECTION & VALIDATION LOGIC ---
-
-    collectData() {
-        const selectedRadio = document.querySelector(`input[name="${this.elements.radioGroup}"]:checked`);
-        const lokasiJalan = selectedRadio ? selectedRadio.value : '';
-
-        return {
-            Lokasi      : lokasiJalan,
-            Koordinat   : this.elements.latLong.value.trim(),
-            Nama        : this.elements.nama.value.trim(),
-            Usia        : this.elements.usia.value.trim(),
-            Diameter    : this.elements.diameter.value.trim(),
-            Tajuk       : this.elements.lebarTajuk.value.trim(),
-            Keterangan  : this.elements.keterangan.value.trim()
-        };
-    }
-
-    validateAndProvideFeedback(data) {
-        console.log(data)
-        let isValid = true;
-        
-        // 1. Reset Feedback Visual
-        this.requiredFields.forEach(field => {
-            if (field.element) {
-                field.element.classList.remove('is-invalid');
-                if (field.isInput) {
-                    const defaultPlaceholder = field.element.id ? field.element.getAttribute('placeholder') : 'Jawaban Anda';
-                    field.element.placeholder = defaultPlaceholder; 
-                }
-            }
-        });
-
-        // 2. Validasi dan Terapkan Feedback Merah
-        this.requiredFields.forEach(field => {
-            const value = data[field.key];
-            
-            if (!value || value.length === 0) { 
-                console.log(value)
-                const el = field.element;
-                if (el) {
-                    el.classList.add('is-invalid');
-                    if (field.isInput && field.key != 'Koordinat') el.placeholder = `[ WAJIB DIISI ] ${field.label}`;
-                }
-                isValid = false;
-            }
-        });
-
-        return isValid;
-    }
-
-    // --- LOGIKA FETCH (GET REQUEST) ---
-
-    async sendDataAsQuery(data) {
-
-        STATIC.loaderRun("Mengirim Data...")
-
-        try {
-            const post = await new RequestManager().post({
-                data : data
-            })
-            
-            if (!post.confirm) throw new Error(post.error.message)
-            else if (!post.data.confirm) {
-                throw new Error("Server Respon")
-            }
-            else if (post.data.confirm) {
-                STATIC.loaderStop()
-                const verify = STATIC.verifyController({
-                    text : "Auto refresh in 5 seconds",
-                    head : "Data Terkirim",
-                }).show(async () => {
-                    let counter = 5
-                    const interval = setInterval(() => {
-                        document.querySelector("#verify-text").textContent = "Auto refresh in " +  counter + " seconds"
-                        counter --
-                        if (counter <= 0) return window.location.reload()
-                    }, 1000)
-                })
-            }
-
-        } catch (error) {
-            STATIC.loaderStop()
-            STATIC.verifyController({
-                status : 'denied',
-                head : "FAILED",
-                text : "Error : " + "Gagal kirim data. "
-            }).show()
-        }
-    }
-
-    // --- HANDLE SUBMIT UTAMA ---
-
-    handleSubmit() {
-        const data = this.collectData();
-        const isValid = this.validateAndProvideFeedback(data);
-
-        if (isValid) {
-            this.stopLocationDetection(); // Hentikan deteksi lokasi sebelum submit
-            
-            // --- KIRIM DATA MENGGUNAKAN FETCH GET ---
-            this.sendDataAsQuery(data); 
-            
-        } else {
-            alert("Mohon lengkapi SEMUA kolom yang WAJIB DIISI.");
-        }
-    }
-}
-
 // -------------------------------------------------------------
 // EKSEKUSI CLASS
 // -------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
     // Inisialisasi class, menargetkan div utama form (id="form")
-    new tree(); 
+    console.log(document.querySelector("#nama"))
+    const trx = new tree(); 
+    console.log(trx.elements)
     setTimeout(() => {
         document.querySelector("#loader").classList.add("dis-none")
     }, 2000);
@@ -238,16 +21,68 @@ class tree {
             Diameter    : document.getElementById('diameter'),
             Tajuk       : document.getElementById('tajuk'), 
             Koordinat   : document.getElementById('koordinat'),
-            Keterangan  : document.getElementById('keterangan'),
-            Submit      : document.querySelector('button')
+            Keterangan  : document.getElementById('keterangan')
         };
+        this.recoveryInterval = null
+        this.Submit = document.querySelector('button')
+        this.reRoad = document.querySelector('i.fa-retweet');
+        this.radios = document.querySelectorAll("input[name='lokasi_jalan']")
         this.autoDetectLocation()
-        if (this.elements.Submit) {
-            this.elements.Submit.addEventListener('click', (e) => {
+        this.eventListener()
+        this.autoRecovery()
+    }
+    eventListener(){
+        if (this.Submit) {
+            this.Submit.addEventListener('click', (e) => {
                 e.preventDefault(); 
                 this.handleSubmit();
             });
         }
+        this.reRoad.onclick = () => {
+            this.radios.forEach(el => {
+                el.checked = false
+                el.disabled = false
+                el.classList.remove("opacity-50")
+            })
+        }  
+    }
+    setLokasiJalan() {
+        const jalan = JSON.parse(localStorage.getItem("lokasi_jalan"));
+        let selectionFound = false; // Gunakan boolean flag
+
+        // 1. INISIALISASI DAN KUNCI PADA LOAD
+        this.radios.forEach(el => {
+            // Cek apakah ada pilihan tersimpan dan cocok
+            if (jalan && el.value === jalan) {
+                el.disabled = false;
+                el.checked = true;
+                el.classList.remove("opacity-50");
+                selectionFound = true; // Set flag
+                console.log("Pilihan ditemukan dan dipilih:", el.value);
+            } else {
+                el.disabled = true;
+                el.classList.add("opacity-50");
+                console.log("Pilihan tidak cocok atau tidak ada:", el.value);
+            }
+            
+            // 2. TENTUKAN EVENT LISTENER ONCHANGE
+            el.onchange = () => {
+                // Kunci semua radio button kecuali yang dipilih
+                this.radios.forEach(r => {
+                    if (r == el) return r.disabled = false;
+                    r.disabled = true;
+                    r.classList.add("opacity-50");
+                });
+                
+                // Simpan pilihan dan hilangkan opacity pada yang baru dipilih
+                localStorage.setItem("lokasi_jalan", JSON.stringify(el.value));
+                el.classList.remove("opacity-50");
+            };
+        });
+
+
+        // 3. PENANGANAN JIKA TIDAK ADA PILIHAN YANG VALID
+        if (!jalan || !selectionFound) return this.reRoad.click();
     }
     autoDetectLocation() {
         const latLongInput = this.elements.Koordinat;
@@ -262,7 +97,7 @@ class tree {
             navigator.geolocation.getCurrentPosition(success, error, options);
             setInterval(() => {
                 navigator.geolocation.getCurrentPosition(success, error, options);
-            }, 2000); 
+            }, 1000); 
 
         } else {
             latLongInput.placeholder = "Geolocation tidak didukung.";
@@ -287,14 +122,13 @@ class tree {
             default:
                 pesan = "Gagal mendeteksi lokasi. Mencoba lagi...";
         }
-        if (!this.elements.latLong.value) {
-            this.elements.latLong.placeholder = pesan;
+        if (!this.elements.Koordinat.value) {
+            this.elements.Koordinat.placeholder = pesan;
         }
     }
     collectData() {
         const selectedRadio = document.querySelector(`input[name="lokasi_jalan"]:checked`);
         const lokasiJalan = selectedRadio ? selectedRadio.value : '';
-
         return {
             Lokasi      : lokasiJalan,
             Koordinat   : this.elements.Koordinat.value.trim(),
@@ -360,10 +194,32 @@ class tree {
         const isValid = this.validate(data);
         if (isValid) {
             console.log("Data valid, siap dikirim:", data);
+            this.clearRecoveryInterval()
             this.sendDataAsQuery(data);
         } else {
             alert("Mohon lengkapi SEMUA kolom yang WAJIB DIISI.");
         }
+    }
+    autoRecovery(){
+        this.setLokasiJalan()
+        const recovery = JSON.parse(localStorage.getItem("recovery"))
+        if (recovery) {
+            this.elements.Nama.value          = recovery.Nama  
+            this.elements.Usia.value          = recovery.Usia
+            this.elements.Diameter.value      = recovery.Diameter
+            this.elements.Tajuk.value         = recovery.Tajuk
+            this.elements.Keterangan.value    = recovery.Keterangan
+        }
+        setTimeout(() => {
+            this.recoveryInterval = setInterval(()=> {
+                localStorage.setItem("recovery", JSON.stringify(this.collectData()))
+            }, 1000)
+        }, 2000)
+
+    }
+    clearRecoveryInterval() {
+        clearInterval(this.recoveryInterval)
+        localStorage.removeItem("recovery")
     }
 }
 
