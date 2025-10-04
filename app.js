@@ -85,11 +85,10 @@ class TreeFormData {
 
     showSuccess(position) {
         this.stopLocationDetection();
-        const lat = position.coords.latitude.toFixed(6); 
-        const lon = position.coords.longitude.toFixed(6); 
-        this.elements.latLong.value = `${lat}, ${lon}`;
+        const lat = position.coords.latitude; 
+        const lon = position.coords.longitude; 
+        this.elements.latLong.value = `${lat} ${lon}`;
         this.elements.latLong.placeholder = "Lokasi terdeteksi";
-        this.updateLocationIcon('success');
     }
 
     showError(error) {
@@ -223,7 +222,7 @@ class TreeFormData {
 // -------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
     // Inisialisasi class, menargetkan div utama form (id="form")
-    new TreeFormData('#form'); 
+    new tree(); 
     setTimeout(() => {
         document.querySelector("#loader").classList.add("dis-none")
     }, 2000);
@@ -238,10 +237,17 @@ class tree {
             Usia        : document.getElementById('usia'),
             Diameter    : document.getElementById('diameter'),
             Tajuk       : document.getElementById('tajuk'), 
-            Koordinat   : document.getElementById('LatLong'),
+            Koordinat   : document.getElementById('koordinat'),
             Keterangan  : document.getElementById('keterangan'),
             Submit      : document.querySelector('button')
         };
+        this.autoDetectLocation()
+        if (this.elements.Submit) {
+            this.elements.Submit.addEventListener('click', (e) => {
+                e.preventDefault(); 
+                this.handleSubmit();
+            });
+        }
     }
     autoDetectLocation() {
         const latLongInput = this.elements.Koordinat;
@@ -260,10 +266,105 @@ class tree {
 
         } else {
             latLongInput.placeholder = "Geolocation tidak didukung.";
-            //this.updateLocationIcon('fail');
         }
     }
+    showSuccess(position) {
+        const lat = position.coords.latitude; 
+        const lon = position.coords.longitude; 
+        this.elements.Koordinat.value = `${lat} ${lon}`;
+        this.elements.Koordinat.placeholder = "Lokasi terdeteksi";
+    }
+    showError(error) {
+        let pesan;
+        switch(error.code) {
+            case error.PERMISSION_DENIED:
+                pesan = "Akses lokasi ditolak.";
+                this.stopLocationDetection();
+                break;
+            case error.TIMEOUT:
+                pesan = "Deteksi lokasi gagal (Timeout). Mencoba lagi...";
+                break;
+            default:
+                pesan = "Gagal mendeteksi lokasi. Mencoba lagi...";
+        }
+        if (!this.elements.latLong.value) {
+            this.elements.latLong.placeholder = pesan;
+        }
+    }
+    collectData() {
+        const selectedRadio = document.querySelector(`input[name="lokasi_jalan"]:checked`);
+        const lokasiJalan = selectedRadio ? selectedRadio.value : '';
 
+        return {
+            Lokasi      : lokasiJalan,
+            Koordinat   : this.elements.Koordinat.value.trim(),
+            Nama        : this.elements.Nama.value.trim(),
+            Usia        : this.elements.Usia.value.trim(),
+            Diameter    : this.elements.Diameter.value.trim(),
+            Tajuk       : this.elements.Tajuk.value.trim(),
+            Keterangan  : this.elements.Keterangan.value.trim()
+        };
+    }
+    validate(data) {
+        let param = true
+        Object.keys(data).forEach(key => {
+            if (!data[key] || data[key].length === 0) {
+                if (key == "Keterangan") return
+                param = false
+                const el = this.elements[key]
+                if (!el) return
+                el.placeholder = `[ WAJIB DIISI ] ${key}`;
+            }
+        })
+        return param
+    }
+    async sendDataAsQuery(data) {
+
+        STATIC.loaderRun("Mengirim Data...")
+
+        try {
+            const post = await new RequestManager().post({
+                data : data
+            })
+            
+            if (!post.confirm) throw new Error(post.error.message)
+            else if (!post.data.confirm) {
+                throw new Error("Server Respon")
+            }
+            else if (post.data.confirm) {
+                STATIC.loaderStop()
+                const verify = STATIC.verifyController({
+                    text : "Auto refresh in 5 seconds",
+                    head : "Data Terkirim",
+                }).show(async () => {
+                    let counter = 5
+                    const interval = setInterval(() => {
+                        document.querySelector("#verify-text").textContent = "Auto refresh in " +  counter + " seconds"
+                        counter --
+                        if (counter <= 0) return window.location.reload()
+                    }, 1000)
+                })
+            }
+
+        } catch (error) {
+            STATIC.loaderStop()
+            STATIC.verifyController({
+                status : 'denied',
+                head : "FAILED",
+                text : "Error : " + "Gagal kirim data. "
+            }).show()
+        }
+    }
+    handleSubmit() {
+        const data = this.collectData();
+        const isValid = this.validate(data);
+        if (isValid) {
+            console.log("Data valid, siap dikirim:", data);
+            this.sendDataAsQuery(data);
+        } else {
+            alert("Mohon lengkapi SEMUA kolom yang WAJIB DIISI.");
+        }
+    }
 }
 
 
