@@ -57,15 +57,15 @@
                 <label class=" dis-block ask-label bolder w-100">Usia Pohon</label>
                 <span class="fz-10 m-0 p-0">Masukan usia dalam tahun</span>
                 <div class="flex-beetwen w-100 gap-10">
-                    <input type="number" maxlength="2" id="usia" class="w-100 p-5 borad-3" placeholder="Jawaban Anda">
+                    <input type="number" maxlength="2" id="usia" class="w-100 p-5 borad-3" onkeydown="return ['e', 'E', '+', '-'].includes(event.key) ? event.preventDefault() : true" placeholder="Masukkan Angka Saja">
                 </div>
             </div>
 
             <div class="form-group white p-10 borad-5">
-                <label class=" dis-block ask-label bolder w-100">Diameter Pohon</label>
+                <label class=" dis-block ask-label bolder w-100">Keliling Pohon</label>
                 <span class="fz-10 m-0 p-0">Pengukuran di ketinggian 1,3 Meter dari atas permukaan tanah. Dalam ukuran centimeter</span>
                 <div class="flex-beetwen mt-1 w-100 gap-10">
-                    <input type="number" maxlength="3" id="diameter" class="w-100 p-5 borad-3" placeholder="Jawaban Anda">
+                    <input type="number" maxlength="3" id="diameter" class="w-100 p-5 borad-3" onkeydown="return ['e', 'E', '+', '-'].includes(event.key) ? event.preventDefault() : true" placeholder="Masukkan Angka Saja">
                 </div>
             </div>
 
@@ -73,7 +73,7 @@
                 <label class=" dis-block ask-label bolder w-100">Lebar Tajuk</label>
                 <span class="fz-10 m-0 p-0">Lebar tajuk diukur pada bentang terlebar proyeksi tajuk pohon. Dalam ukuran meter</span>
                 <div class="flex-beetwen mt-1 w-100 gap-10">
-                    <input type="number" maxlength="2" id="tajuk" class="w-100 p-5 borad-3" placeholder="Jawaban Anda">
+                    <input type="number" maxlength="2" id="tajuk" class="w-100 p-5 borad-3" onkeydown="return ['e', 'E', '+', '-'].includes(event.key) ? event.preventDefault() : true" placeholder="Masukkan Angka Saja">
                 </div>
             </div>
 

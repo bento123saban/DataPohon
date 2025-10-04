@@ -103,7 +103,7 @@ class tree {
             navigator.geolocation.getCurrentPosition(success, error, options);
             setInterval(() => {
                 navigator.geolocation.getCurrentPosition(success, error, options);
-            }, 2000); 
+            }, 5000); 
 
         } else {
             latLongInput.placeholder = "Geolocation tidak didukung.";
@@ -121,7 +121,7 @@ class tree {
         const response  = await fetch(`https://us1.locationiq.com/v1/reverse?lat=${lat}&lon=${lon}&key=pk.a9bd630f0a7845193817de89ad1c07ab`, options)
         const json      = this.xmlToJson(await response.text())
         const JSX = JSON.parse(json);
-        if (JSX) {
+        if (JSX.reversegeocode) {
             const geoData = JSX.reversegeocode.result["#text"]
             document.getElementById("koordinat-text").innerHTML = geoData
             //console.log(geoData)
