@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
 class tree {
     constructor () {
         this.request = new RequestManager()
+
         this.elements = {
             Nama        : document.getElementById('nama'),
             Usia        : document.getElementById('usia'),
@@ -361,7 +362,6 @@ class tree {
                     this.pingElement.classList.remove("red")
                     this.pingElement.classList.add("green")
                 }
-                //this.pingElement.textContent = `${Math.round(diff)} ms`
             }, 500)
             await this.request.post({
                 xxx : "ping"
