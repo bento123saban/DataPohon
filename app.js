@@ -214,6 +214,7 @@ class tree {
                     text : "Auto refresh in 5 seconds",
                     head : "Data Terkirim",
                 }).show(async () => {
+                    this.clearRecoveryInterval()
                     let counter = 5
                     const interval = setInterval(() => {
                         document.querySelector("#verify-text").textContent = "Auto refresh in " +  counter + " seconds"
