@@ -2,7 +2,6 @@
 // EKSEKUSI CLASS
 // -------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
-    // Inisialisasi class, menargetkan div utama form (id="form")
     const trx = new tree(); 
     if (navigator.onLine) setTimeout(() => {
             document.querySelector("#loader").classList.add("dis-none")
@@ -236,12 +235,8 @@ class tree {
     handleSubmit() {
         const data = this.collectData();
         const isValid = this.validate(data);
-        if (isValid) {
-            this.clearRecoveryInterval()
-            this.sendDataAsQuery(data);
-        } else {
-            alert("Mohon lengkapi SEMUA kolom yang WAJIB DIISI.");
-        }
+        if (isValid) this.sendDataAsQuery(data);
+        else alert("Mohon lengkapi SEMUA kolom yang WAJIB DIISI.");
     }
     autoRecovery(){
         this.setLokasiJalan()
@@ -346,7 +341,7 @@ class tree {
     }
     pingStart() {
         this.pingParam = true
-        this.ping()
+        //this.ping()
     }
     async ping() {
         let lastPing = 0
