@@ -135,8 +135,8 @@ class tree {
         }
     }
     showSuccess(position) {
-        const lat = position.coords.latitude; 
-        const lon = position.coords.longitude; 
+        const lat = position.coords.latitude.toFixed(6); 
+        const lon = position.coords.longitude.toFixed(6); 
         this.elements.Koordinat.value = `${lat} ${lon}`;
         this.elements.Koordinat.placeholder = "Lokasi terdeteksi";
         this.KoordinatData(lat, lon)
